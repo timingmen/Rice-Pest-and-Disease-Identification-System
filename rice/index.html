@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水稻病虫害识别系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        dark: '#1D2129',
+                        light: '#F2F3F5',
+                        neutral: '#86909C'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .hover-lift {
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .hover-lift:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+            }
+            .text-balance {
+                text-wrap: balance;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen flex flex-col">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50 transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-leaf text-secondary text-2xl"></i>
+                <h1 class="text-xl font-bold text-dark">水稻病虫害识别系统</h1>
+            </div>
+
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="#" class="text-primary font-medium hover:text-primary/80 transition-colors">首页</a>
+                <a href="#features" class="text-dark hover:text-primary transition-colors">功能</a>
+                <a href="#diseases" class="text-dark hover:text-primary transition-colors">病虫害库</a>
+                <a href="#about" class="text-dark hover:text-primary transition-colors">关于</a>
+            </nav>
+
+            <button class="md:hidden text-dark text-xl" id="menu-toggle">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div class="md:hidden hidden bg-white shadow-md absolute w-full" id="mobile-menu">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-3">
+                <a href="#" class="text-primary font-medium py-2 hover:bg-gray-50 rounded px-3 transition-colors">首页</a>
+                <a href="#features" class="text-dark py-2 hover:bg-gray-50 rounded px-3 transition-colors">功能</a>
+                <a href="#diseases" class="text-dark py-2 hover:bg-gray-50 rounded px-3 transition-colors">病虫害库</a>
+                <a href="#about" class="text-dark py-2 hover:bg-gray-50 rounded px-3 transition-colors">关于</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <!-- 欢迎区域 -->
+        <section class="mb-12 text-center">
+            <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold text-dark mb-4">智能识别水稻病虫害</h2>
+            <p class="text-neutral max-w-2xl mx-auto text-balance">利用先进的深度学习技术，快速准确识别水稻常见病虫害，为您提供专业的防治建议。</p>
+        </section>
+
+        <!-- 功能区 -->
+        <section id="features" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white rounded-xl p-6 card-shadow hover-lift">
+                <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <i class="fa fa-upload text-primary text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-dark mb-2">图片上传识别</h3>
+                <p class="text-neutral">上传水稻叶片图片，系统将自动分析并识别可能存在的病虫害。</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow hover-lift">
+                <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
+                    <i class="fa fa-video-camera text-secondary text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-dark mb-2">实时摄像头检测</h3>
+                <p class="text-neutral">打开摄像头，实时检测水稻叶片健康状况，快速获取诊断结果。</p>
+            </div>
+
+            <div class="bg-white rounded-xl p-6 card-shadow hover-lift">
+                <div class="w-14 h-14 rounded-full bg-warning/10 flex items-center justify-center mb-4">
+                    <i class="fa fa-book text-warning text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-dark mb-2">病虫害知识库</h3>
+                <p class="text-neutral">包含9种常见水稻病虫害的详细介绍和防治建议，助您有效管理稻田。</p>
+            </div>
+        </section>
+
+        <!-- 操作区域 -->
+        <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- 左侧控制面板 -->
+                <div class="w-full md:w-1/4 flex flex-col">
+                    <h3 class="text-lg font-semibold text-dark mb-4 flex items-center">
+                        <i class="fa fa-cog text-primary mr-2"></i>操作面板
+                    </h3>
+
+                    <div class="space-y-4">
+                        <button id="load-model-btn" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center">
+                            <i class="fa fa-download mr-2"></i>加载模型
+                        </button>
+
+                        <button id="upload-img-btn" class="w-full bg-white border border-gray-300 hover:border-primary text-dark font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center" disabled>
+                            <i class="fa fa-picture-o mr-2"></i>上传图片
+                        </button>
+
+                        <button id="camera-toggle-btn" class="w-full bg-white border border-gray-300 hover:border-primary text-dark font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center" disabled>
+                            <i class="fa fa-video-camera mr-2"></i>打开摄像头
+                        </button>
+
+                        <button id="capture-btn" class="w-full bg-white border border-gray-300 hover:border-primary text-dark font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center" disabled>
+                            <i class="fa fa-camera mr-2"></i>捕获图像
+                        </button>
+                    </div>
+
+                    <!-- 状态显示 -->
+                    <div class="mt-auto pt-4 border-t border-gray-100">
+                        <h4 class="text-sm font-medium text-neutral mb-2">当前状态</h4>
+                        <div id="status-display" class="bg-gray-50 rounded-lg p-3 text-sm text-neutral min-h-[60px]">
+                            就绪
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧图像显示区域 -->
+                <div class="w-full md:w-3/4 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- 原始图像 -->
+                        <div class="flex flex-col">
+                            <h3 class="text-lg font-semibold text-dark mb-2 flex items-center">
+                                <i class="fa fa-image text-primary mr-2"></i>原始图像
+                            </h3>
+                            <div id="original-image-container" class="bg-gray-50 rounded-lg flex items-center justify-center h-[300px] border border-gray-200">
+                                <p class="text-neutral text-center">请上传图片或打开摄像头</p>
+                            </div>
+                        </div>
+
+                        <!-- 结果图像 -->
+                        <div class="flex flex-col">
+                            <h3 class="text-lg font-semibold text-dark mb-2 flex items-center">
+                                <i class="fa fa-bar-chart text-primary mr-2"></i>识别结果
+                            </h3>
+                            <div id="result-image-container" class="bg-gray-50 rounded-lg flex items-center justify-center h-[300px] border border-gray-200">
+                                <p class="text-neutral text-center">等待识别结果</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 识别详情 -->
+                    <div id="result-details" class="hidden bg-gray-50 rounded-lg p-5 border border-gray-200">
+                        <h3 class="text-lg font-semibold text-dark mb-3 flex items-center">
+                            <i class="fa fa-info-circle text-primary mr-2"></i>病虫害详情
+                        </h3>
+
+                        <div class="space-y-4">
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <div class="md:w-1/3">
+                                    <h4 class="text-sm font-medium text-neutral mb-1">病虫害名称</h4>
+                                    <p id="disease-name" class="text-dark font-semibold"></p>
+                                </div>
+                                <div class="md:w-1/3">
+                                    <h4 class="text-sm font-medium text-neutral mb-1">危害程度</h4>
+                                    <div id="severity-level" class="flex items-center"></div>
+                                </div>
+                                <div class="md:w-1/3">
+                                    <h4 class="text-sm font-medium text-neutral mb-1">置信度</h4>
+                                    <p id="confidence-level" class="text-dark font-semibold"></p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-medium text-neutral mb-1">症状描述</h4>
+                                <p id="disease-symptoms" class="text-dark"></p>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-medium text-neutral mb-1">防治建议</h4>
+                                <p id="disease-treatment" class="text-dark"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 病虫害库 -->
+        <section id="diseases" class="mb-12">
+            <h2 class="text-2xl font-bold text-dark mb-6 text-center">水稻常见病虫害库</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 病害卡片将通过JavaScript动态生成 -->
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4 flex items-center">
+                        <i class="fa fa-leaf text-secondary mr-2"></i>水稻病虫害识别系统
+                    </h3>
+                    <p class="text-gray-400 mb-4">利用先进的深度学习技术，为您提供准确、快速的水稻病虫害识别服务。</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fa fa-github text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fa fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fa fa-linkedin text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">首页</a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">功能</a></li>
+                        <li><a href="#diseases" class="text-gray-400 hover:text-white transition-colors">病虫害库</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">关于我们</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">联系我们</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <i class="fa fa-envelope text-secondary mt-1 mr-3"></i>
+                            <span class="text-gray-400">contact@ricedisease.ai</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-phone text-secondary mt-1 mr-3"></i>
+                            <span class="text-gray-400">+86 123 4567 8910</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-map-marker text-secondary mt-1 mr-3"></i>
+                            <span class="text-gray-400">中国农业科学院，北京市海淀区</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>© 2025 水稻病虫害识别系统 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 病虫害信息数据 -->
+    <script>
+        // 病虫害数据
+        const diseasesData = [
+            {
+                id: 0,
+                name: "白叶枯病",
+                severity: "高",
+                severityColor: "text-danger",
+                confidence: "98%",
+                symptoms: "叶片出现水渍状病斑，逐渐扩展为黄色至灰白色的长条斑，边缘波纹状。病斑上常有蜜黄色菌脓溢出，干燥后结成硬粒。",
+                treatment: "1. 选用抗病品种；2. 种子消毒处理；3. 发病初期喷施叶枯唑、噻菌铜等杀菌剂；4. 及时清除病叶和病株，减少病原菌传播。",
+                image: "https://picsum.photos/seed/bacterialblight/400/300",
+                alt: "白叶枯病症状图片"
+            },
+            {
+                id: 1,
+                name: "稻瘟病",
+                severity: "高",
+                severityColor: "text-danger",
+                confidence: "96%",
+                symptoms: "根据发病部位不同可分为苗瘟、叶瘟、节瘟、穗颈瘟和谷粒瘟。叶瘟表现为叶片上出现梭形病斑，中央灰白色，边缘褐色。穗颈瘟会导致穗颈枯死，造成白穗。",
+                treatment: "1. 选用抗病品种；2. 种子消毒；3. 合理密植，科学施肥；4. 发病初期喷施三环唑、稻瘟灵等杀菌剂。",
+                image: "https://picsum.photos/seed/leafblast/400/300",
+                alt: "稻瘟病症状图片"
+            },
+            {
+                id: 2,
+                name: "健康水稻叶",
+                severity: "无",
+                severityColor: "text-secondary",
+                confidence: "99%",
+                symptoms: "叶片颜色鲜绿，无病斑、虫蛀或其他异常症状，叶脉清晰，叶片挺拔有光泽。",
+                treatment: "1. 保持田间合理灌溉和排水；2. 定期监测稻田，预防病虫害发生；3. 合理施肥，增强水稻抵抗力。",
+                image: "https://picsum.photos/seed/healthyleaf/400/300",
+                alt: "健康水稻叶图片"
+            },
+            {
+                id: 3,
+                name: "叶鞘腐败病",
+                severity: "中",
+                severityColor: "text-warning",
+                confidence: "94%",
+                symptoms: "叶鞘上出现暗褐色至黑色病斑，边缘不清晰，病斑扩展后可导致整个叶鞘腐烂。湿度大时，病部表面产生白色至淡红色霉层。",
+                treatment: "1. 清除病残体，减少病原菌越冬；2. 合理密植，改善通风透光条件；3. 发病初期喷施多菌灵、甲基硫菌灵等杀菌剂。",
+                image: "https://picsum.photos/seed/sheathblight/400/300",
+                alt: "叶鞘腐败病症状图片"
+            },
+            {
+                id: 4,
+                name: "叶鞘网斑病",
+                severity: "中",
+                severityColor: "text-warning",
+                confidence: "92%",
+                symptoms: "叶鞘上出现褐色至深褐色小斑点，逐渐扩大并相互融合成不规则形的网状病斑。病斑边缘褐色，中央灰白色。",
+                treatment: "1. 及时清除病叶和病鞘；2. 合理施肥，避免偏施氮肥；3. 发病初期喷施井冈霉素、戊唑醇等杀菌剂。",
+                image: "https://picsum.photos/seed/sheathnetblotch/400/300",
+                alt: "叶鞘网斑病症状图片"
+            },
+            {
+                id: 5,
+                name: "窄条斑病",
+                severity: "低",
+                severityColor: "text-neutral",
+                confidence: "90%",
+                symptoms: "叶片上出现细小的褐色至深褐色条斑，条斑宽度较窄，长度不一，沿叶脉延伸。严重时，多个条斑可融合成大斑，导致叶片枯黄。",
+                treatment: "1. 加强田间管理，合理排灌；2. 及时清除病叶；3. 发病初期喷施噻森铜、噻菌铜等杀菌剂。",
+                image: "https://picsum.photos/seed/narrowbrownspot/400/300",
+                alt: "窄条斑病症状图片"
+            },
+            {
+                id: 6,
+                name: "穗颈瘟",
+                severity: "高",
+                severityColor: "text-danger",
+                confidence: "97%",
+                symptoms: "穗颈和枝梗上出现褐色至黑褐色病斑，病斑环绕穗颈或枝梗，导致穗部营养供应受阻，形成白穗或瘪粒。",
+                treatment: "1. 选用抗病品种；2. 种子消毒；3. 破口期和齐穗期各喷施一次三环唑、稻瘟灵等杀菌剂；4. 及时清除病穗。",
+                image: "https://picsum.photos/seed/neckblast/400/300",
+                alt: "穗颈瘟症状图片"
+            },
+            {
+                id: 7,
+                name: "稻纵卷叶螟",
+                severity: "中",
+                severityColor: "text-warning",
+                confidence: "93%",
+                symptoms: "幼虫吐丝将叶片纵卷成筒状，藏在其中取食叶肉，导致叶片出现白色条斑。严重时，全田叶片枯黄卷曲，影响光合作用和产量。",
+                treatment: "1. 释放赤眼蜂等天敌；2. 使用苏云金芽孢杆菌（Bt）等生物农药；3. 化学防治可选用氯虫苯甲酰胺、甲氨基阿维菌素苯甲酸盐等杀虫剂。",
+                image: "https://picsum.photos/seed/ricethrips/400/300",
+                alt: "稻纵卷叶螟危害症状图片"
+            },
+            {
+                id: 8,
+                name: "纹枯病",
+                severity: "中",
+                severityColor: "text-warning",
+                confidence: "95%",
+                symptoms: "叶鞘和叶片上出现水渍状暗绿色病斑，逐渐扩大成云纹状，边缘褐色，中央灰白色。湿度大时，病部产生白色菌丝体和褐色菌核。",
+                treatment: "1. 合理密植，改善通风透光条件；2. 控制氮肥用量，增施磷钾肥；3. 发病初期喷施井冈霉素、噻呋酰胺等杀菌剂；4. 及时清除病叶和菌核。",
+                image: "https://picsum.photos/seed/sheathblight2/400/300",
+                alt: "纹枯病症状图片"
+            }
+        ];
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 渲染病虫害库卡片
+            const diseasesContainer = document.querySelector('#diseases .grid');
+            diseasesData.forEach(disease => {
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl overflow-hidden shadow-md hover-lift';
+                card.innerHTML = `
+                    <img src="${disease.image}" alt="${disease.alt}" class="w-full h-48 object-cover">
+                    <div class="p-5">
+                        <h3 class="text-lg font-semibold text-dark mb-1">${disease.name}</h3>
+                        <div class="flex items-center mb-3">
+                            <span class="text-sm font-medium ${disease.severityColor}">${disease.severity}危害</span>
+                        </div>
+                        <p class="text-neutral text-sm mb-4 line-clamp-3">${disease.symptoms}</p>
+                        <button class="disease-detail-btn w-full bg-primary/10 hover:bg-primary/20 text-primary font-medium py-2 px-4 rounded-lg transition-colors text-sm" data-id="${disease.id}">
+                            查看详情
+                        </button>
+                    </div>
+                `;
+                diseasesContainer.appendChild(card);
+            });
+
+            // 移动端菜单切换
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // 导航栏滚动效果
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 10) {
+                    navbar.classList.add('shadow-md');
+                    navbar.classList.remove('shadow-sm');
+                } else {
+                    navbar.classList.remove('shadow-md');
+                    navbar.classList.add('shadow-sm');
+                }
+            });
+
+            // 模拟按钮点击效果
+            const loadModelBtn = document.getElementById('load-model-btn');
+            const uploadImgBtn = document.getElementById('upload-img-btn');
+            const cameraToggleBtn = document.getElementById('camera-toggle-btn');
+            const captureBtn = document.getElementById('capture-btn');
+            const statusDisplay = document.getElementById('status-display');
+            const originalImageContainer = document.getElementById('original-image-container');
+            const resultImageContainer = document.getElementById('result-image-container');
+            const resultDetails = document.getElementById('result-details');
+
+            let isModelLoaded = false;
+            let isCameraActive = false;
+
+            // 加载模型按钮
+            loadModelBtn.addEventListener('click', function() {
+                if (!isModelLoaded) {
+                    statusDisplay.textContent = "正在加载模型...";
+
+                    // 模拟加载延迟
+                    setTimeout(() => {
+                        isModelLoaded = true;
+                        statusDisplay.textContent = "模型加载成功";
+                        loadModelBtn.classList.remove('bg-primary');
+                        loadModelBtn.classList.add('bg-secondary');
+                        loadModelBtn.innerHTML = '<i class="fa fa-check mr-2"></i>模型已加载';
+
+                        // 启用其他按钮
+                        uploadImgBtn.disabled = false;
+                        uploadImgBtn.classList.remove('border-gray-300');
+                        uploadImgBtn.classList.add('hover:border-primary');
+
+                        cameraToggleBtn.disabled = false;
+                        cameraToggleBtn.classList.remove('border-gray-300');
+                        cameraToggleBtn.classList.add('hover:border-primary');
+                    }, 1500);
+                }
+            });
+
+            // 上传图片按钮
+            uploadImgBtn.addEventListener('click', function() {
+                if (!isModelLoaded) {
+                    alert("请先加载模型");
+                    return;
+                }
+
+                // 模拟文件选择对话框
+                statusDisplay.textContent = "请选择图片文件...";
+
+                // 模拟选择文件后的处理
+                setTimeout(() => {
+                    // 随机选择一种病害
+                    const randomDisease = diseasesData[Math.floor(Math.random() * diseasesData.length)];
+
+                    // 更新UI
+                    originalImageContainer.innerHTML = `
+                        <img src="${randomDisease.image}" alt="${randomDisease.alt}" class="max-h-full max-w-full object-contain">
+                    `;
+
+                    // 模拟处理延迟
+                    statusDisplay.textContent = "正在分析图片...";
+
+                    setTimeout(() => {
+                        resultImageContainer.innerHTML = `
+                            <img src="${randomDisease.image}" alt="${randomDisease.alt}" class="max-h-full max-w-full object-contain">
+                            <div class="absolute bottom-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded">
+                                ${randomDisease.name}
+                            </div>
+                        `;
+
+                        // 显示详情
+                        document.getElementById('disease-name').textContent = randomDisease.name;
+                        document.getElementById('severity-level').innerHTML = `
+                            <span class="inline-block w-2 h-2 rounded-full ${randomDisease.severityColor} mr-1"></span>
+                            <span class="text-dark font-semibold">${randomDisease.severity}</span>
+                        `;
+                        document.getElementById('confidence-level').textContent = randomDisease.confidence;
+                        document.getElementById('disease-symptoms').textContent = randomDisease.symptoms;
+                        document.getElementById('disease-treatment').textContent = randomDisease.treatment;
+
+                        resultDetails.classList.remove('hidden');
+                        resultDetails.classList.add('block');
+
+                        statusDisplay.textContent = "分析完成";
+                    }, 2000);
+                }, 1000);
+            });
+
+            // 摄像头开关按钮
+            cameraToggleBtn.addEventListener('click', function() {
+                if (!isModelLoaded) {
+                    alert("请先加载模型");
+                    return;
+                }
+
+                if (!isCameraActive) {
+                    isCameraActive = true;
+                    cameraToggleBtn.innerHTML = '<i class="fa fa-video-camera mr-2"></i>关闭摄像头';
+                    cameraToggleBtn.classList.remove('hover:border-primary');
+                    cameraToggleBtn.classList.add('hover:border-danger');
+                    statusDisplay.textContent = "摄像头已打开";
+
+                    // 启用捕获按钮
+                    captureBtn.disabled = false;
+                    captureBtn.classList.remove('border-gray-300');
+                    captureBtn.classList.add('hover:border-primary');
+
+                    // 模拟摄像头视频流
+                    originalImageContainer.innerHTML = `
+                        <div class="relative h-full w-full bg-gray-100 flex items-center justify-center">
+                            <img src="https://picsum.photos/seed/camera/800/600" alt="摄像头预览" class="max-h-full max-w-full object-contain">
+                            <div class="absolute top-2 left-2 bg-danger text-white text-xs px-2 py-1 rounded flex items-center">
+                                <span class="inline-block w-2 h-2 rounded-full bg-white animate-pulse mr-1"></span>
+                                正在录制
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    isCameraActive = false;
+                    cameraToggleBtn.innerHTML = '<i class="fa fa-video-camera mr-2"></i>打开摄像头';
+                    cameraToggleBtn.classList.remove('hover:border-danger');
+                    cameraToggleBtn.classList.add('hover:border-primary');
+                    statusDisplay.textContent = "摄像头已关闭";
+
+                    // 禁用捕获按钮
+                    captureBtn.disabled = true;
+                    captureBtn.classList.remove('hover:border-primary');
+                    captureBtn.classList.add('border-gray-300');
+
+                    originalImageContainer.innerHTML = `
+                        <p class="text-neutral text-center">请上传图片或打开摄像头</p>
+                    `;
+                }
+            });
+
+            // 捕获图像按钮
+            captureBtn.addEventListener('click', function() {
+                if (!isCameraActive) {
+                    alert("请先打开摄像头");
+                    return;
+                }
+
+                statusDisplay.textContent = "正在捕获图像...";
+
+                // 模拟捕获延迟
+                setTimeout(() => {
+                    // 随机选择一种病害
+                    const randomDisease = diseasesData[Math.floor(Math.random() * diseasesData.length)];
+
+                    // 更新UI
+                    originalImageContainer.innerHTML = `
+                        <img src="${randomDisease.image}" alt="${randomDisease.alt}" class="max-h-full max-w-full object-contain">
+                        <div class="absolute bottom-2 right-2 bg-secondary text-white text-xs px-2 py-1 rounded">
+                            已捕获
+                        </div>
+                    `;
+
+                    // 模拟处理延迟
+                    statusDisplay.textContent = "正在分析图片...";
+
+                    setTimeout(() => {
+                        resultImageContainer.innerHTML = `
+                            <img src="${randomDisease.image}" alt="${randomDisease.alt}" class="max-h-full max-w-full object-contain">
+                            <div class="absolute bottom-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded">
+                                ${randomDisease.name}
+                            </div>
+                        `;
+
+                        // 显示详情
+                        document.getElementById('disease-name').textContent = randomDisease.name;
+                        document.getElementById('severity-level').innerHTML = `
+                            <span class="inline-block w-2 h-2 rounded-full ${randomDisease.severityColor} mr-1"></span>
+                            <span class="text-dark font-semibold">${randomDisease.severity}</span>
+                        `;
+                        document.getElementById('confidence-level').textContent = randomDisease.confidence;
+                        document.getElementById('disease-symptoms').textContent = randomDisease.symptoms;
+                        document.getElementById('disease-treatment').textContent = randomDisease.treatment;
+
+                        resultDetails.classList.remove('hidden');
+                        resultDetails.classList.add('block');
+
+                        statusDisplay.textContent = "分析完成";
+                    }, 2000);
+                }, 1000);
+            });
+
+            // 病虫害详情按钮点击事件
+            document.querySelectorAll('.disease-detail-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const diseaseId = parseInt(this.getAttribute('data-id'));
+                    const disease = diseasesData.find(d => d.id === diseaseId);
+
+                    if (disease) {
+                        // 显示详情
+                        document.getElementById('disease-name').textContent = disease.name;
+                        document.getElementById('severity-level').innerHTML = `
+                            <span class="inline-block w-2 h-2 rounded-full ${disease.severityColor} mr-1"></span>
+                            <span class="text-dark font-semibold">${disease.severity}</span>
+                        `;
+                        document.getElementById('confidence-level').textContent = disease.confidence;
+                        document.getElementById('disease-symptoms').textContent = disease.symptoms;
+                        document.getElementById('disease-treatment').textContent = disease.treatment;
+
+                        // 更新图像
+                        originalImageContainer.innerHTML = `
+                            <img src="${disease.image}" alt="${disease.alt}" class="max-h-full max-w-full object-contain">
+                        `;
+
+                        resultImageContainer.innerHTML = `
+                            <img src="${disease.image}" alt="${disease.alt}" class="max-h-full max-w-full object-contain">
+                            <div class="absolute bottom-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded">
+                                ${disease.name}
+                            </div>
+                        `;
+
+                        resultDetails.classList.remove('hidden');
+                        resultDetails.classList.add('block');
+
+                        // 滚动到结果区域
+                        resultDetails.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
