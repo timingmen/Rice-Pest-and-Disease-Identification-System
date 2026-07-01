@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水稻病虫害识别系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold text-gray-800 mb-2">水稻病虫害识别系统</h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">基于深度学习的水稻叶片病害检测与诊断解决方案</p>
+        </header>
+
+        <main class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <!-- 模型加载区域 -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-cog mr-2 text-blue-500"></i>模型加载
+                </h2>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex flex-col md:flex-row gap-4 items-center">
+                        <input type="text" id="modelPath" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="模型路径 (例如: model.pth)">
+                        <button id="loadModelBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-2 rounded-lg transition-all duration-300 flex items-center">
+                            <i class="fa fa-upload mr-2"></i>加载模型
+                        </button>
+                    </div>
+                    <div id="modelStatus" class="mt-3 text-sm text-gray-600"></div>
+                </div>
+            </div>
+
+            <!-- 图像上传区域 -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-image mr-2 text-green-500"></i>图像上传与预测
+                </h2>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <label for="imageUpload" class="block mb-2 text-sm font-medium text-gray-700">选择水稻叶片图像</label>
+                            <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                            <label for="imageUpload" class="flex items-center justify-center w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-all duration-300">
+                                <i class="fa fa-cloud-upload mr-2 text-gray-500"></i>
+                                <span>点击上传图像或拖放至此处</span>
+                            </label>
+                            <div id="imagePreview" class="mt-4 hidden">
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">预览</h3>
+                                <div class="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                    <img id="previewImage" src="" alt="预览图像" class="w-full h-auto max-h-64 object-contain">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-between">
+                            <button id="predictBtn" class="bg-green-500 hover:bg-green-600 text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                <i class="fa fa-search mr-2"></i>开始识别
+                            </button>
+                            <button id="resetBtn" class="mt-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-6 py-2 rounded-lg transition-all duration-300 flex items-center justify-center">
+                                <i class="fa fa-refresh mr-2"></i>重置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 预测结果区域 -->
+            <div id="resultSection" class="mb-8 hidden">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa fa-bar-chart mr-2 text-purple-500"></i>预测结果
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">原始图像</h3>
+                        <div class="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                            <img id="originalImage" src="" alt="原始图像" class="w-full h-auto max-h-64 object-contain">
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">识别结果图像</h3>
+                        <div class="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                            <img id="resultImage" src="" alt="识别结果图像" class="w-full h-auto max-h-64 object-contain">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white p-3 rounded-lg shadow-sm">
+                            <h4 class="text-sm font-medium text-gray-500">病害名称</h4>
+                            <p id="diseaseName" class="text-lg font-semibold text-gray-800"></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg shadow-sm">
+                            <h4 class="text-sm font-medium text-gray-500">置信度</h4>
+                            <p id="confidence" class="text-lg font-semibold text-gray-800"></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg shadow-sm">
+                            <h4 class="text-sm font-medium text-gray-500">严重程度</h4>
+                            <p id="severity" class="text-lg font-semibold"></p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 bg-white p-3 rounded-lg shadow-sm">
+                        <h4 class="text-sm font-medium text-gray-500 mb-2">病害描述</h4>
+                        <p id="description" class="text-gray-700"></p>
+                    </div>
+
+                    <div class="mt-4 bg-white p-3 rounded-lg shadow-sm">
+                        <h4 class="text-sm font-medium text-gray-500 mb-2">防治建议</h4>
+                        <p id="treatment" class="text-gray-700"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p>© 2023 水稻病虫害识别系统 | 基于深度学习的农业智能解决方案</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modelPathInput = document.getElementById('modelPath');
+            const loadModelBtn = document.getElementById('loadModelBtn');
+            const modelStatus = document.getElementById('modelStatus');
+            const imageUpload = document.getElementById('imageUpload');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+            const predictBtn = document.getElementById('predictBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const resultSection = document.getElementById('resultSection');
+            const originalImage = document.getElementById('originalImage');
+            const resultImage = document.getElementById('resultImage');
+            const diseaseName = document.getElementById('diseaseName');
+            const confidence = document.getElementById('confidence');
+            const severity = document.getElementById('severity');
+            const description = document.getElementById('description');
+            const treatment = document.getElementById('treatment');
+
+            let modelLoaded = false;
+            let imageFile = null;
+
+            // 加载模型
+            loadModelBtn.addEventListener('click', async function() {
+                const modelPath = modelPathInput.value.trim();
+                if (!modelPath) {
+                    modelStatus.textContent = '请输入模型路径';
+                    modelStatus.className = 'mt-3 text-sm text-red-500';
+                    return;
+                }
+
+                modelStatus.textContent = '正在加载模型...';
+                modelStatus.className = 'mt-3 text-sm text-blue-500';
+
+                try {
+                    const response = await fetch('/api/load_model', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ model_path: modelPath })
+                    });
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        modelStatus.textContent = data.message;
+                        modelStatus.className = 'mt-3 text-sm text-green-500';
+                        modelLoaded = true;
+                        updatePredictButtonState();
+                    } else {
+                        modelStatus.textContent = data.message;
+                        modelStatus.className = 'mt-3 text-sm text-red-500';
+                    }
+                } catch (error) {
+                    modelStatus.textContent = `请求错误: ${error.message}`;
+                    modelStatus.className = 'mt-3 text-sm text-red-500';
+                }
+            });
+
+            // 图像上传预览
+            imageUpload.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    imageFile = this.files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        imagePreview.classList.remove('hidden');
+                    }
+
+                    reader.readAsDataURL(this.files[0]);
+                    updatePredictButtonState();
+                }
+            });
+
+            // 预测按钮状态更新
+            function updatePredictButtonState() {
+                predictBtn.disabled = !(modelLoaded && imageFile);
+            }
+
+            // 开始预测 - 使用 append 方法替代 add
+            predictBtn.addEventListener('click', async function() {
+                if (!modelLoaded || !imageFile) return;
+
+                predictBtn.disabled = true;
+                predictBtn.innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>识别中...';
+                resultSection.classList.add('hidden');
+
+                try {
+                    const formData = new FormData();
+                    console.log('imageFile:', imageFile); // 调试输出
+
+                    // 使用 append 方法添加文件 (append 是标准方法)
+                    formData.append('image', imageFile);
+
+                    console.log('FormData created successfully'); // 调试输出
+
+                    const response = await fetch('/api/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        // 更新结果区域
+                        originalImage.src = data.original_image_url;
+                        resultImage.src = data.result_image_url;
+                        diseaseName.textContent = data.disease_name;
+                        confidence.textContent = data.confidence;
+                        severity.textContent = data.severity;
+                        severity.className = `text-lg font-semibold ${data.severity_color}`;
+                        description.textContent = data.description;
+                        treatment.textContent = data.treatment;
+
+                        resultSection.classList.remove('hidden');
+                        window.scrollTo({ top: resultSection.offsetTop - 20, behavior: 'smooth' });
+                    } else {
+                        alert(`预测失败: ${data.message}`);
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error); // 调试输出
+                    alert(`请求错误: ${error.message}`);
+                } finally {
+                    predictBtn.disabled = false;
+                    predictBtn.innerHTML = '<i class="fa fa-search mr-2"></i>开始识别';
+                }
+            });
+
+            // 重置按钮
+            resetBtn.addEventListener('click', function() {
+                imageUpload.value = '';
+                imagePreview.classList.add('hidden');
+                resultSection.classList.add('hidden');
+                imageFile = null;
+                updatePredictButtonState();
+            });
+        });
+    </script>
+</body>
+</html>
